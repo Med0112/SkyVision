@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة الإدارة | Sky Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ===== جميع الأنماط الأساسية ===== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+         :root {
+            --primary-dark: #0a1a2f;
+            --secondary-dark: #0d0d0d;
+            --pure-black: #000;
+            --pure-white: #fff;
+            --accent-blue: #00a8ff;
+            --text-light: #b0bec5;
+            --shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s ease;
+            --radius: 14px;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--secondary-dark);
+            color: var(--pure-white);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* ===== شريط التنقل ===== */
+        
+        .admin-nav {
+            background: rgba(10, 26, 47, 0.97);
+            backdrop-filter: blur(12px);
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .admin-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-nav .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--pure-white);
+        }
+        
+        .admin-nav .logo-text span {
+            color: var(--accent-blue);
+        }
+        
+        .admin-nav .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .admin-nav .user-info .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #000;
+        }
+        
+        .admin-nav .user-info .email {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .admin-nav .logout-btn {
+            background: rgba(255, 23, 68, 0.15);
+            border: 1px solid rgba(255, 23, 68, 0.25);
+            color: #ff1744;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .admin-nav .logout-btn:hover {
+            background: #ff1744;
+            color: #fff;
+        }
+        
+        .admin-nav .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            margin-left: 10px;
+        }
+        
+        .admin-nav .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        /* ===== صفحة تسجيل الدخول ===== */
+        
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 168, 255, 0.05), var(--secondary-dark) 80%);
+            padding: 40px 20px;
+        }
+        
+        .login-box {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 50px 40px;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .login-box .logo-icon {
+            font-size: 3.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+        }
+        
+        .login-box h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        
+        .login-box h2 span {
+            color: var(--accent-blue);
+        }
+        
+        .login-box p.sub {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+        
+        .login-box input {
+            width: 100%;
+            padding: 15px 18px;
+            margin-bottom: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: var(--pure-white);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.08);
+        }
+        
+        .login-box .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            background: var(--accent-blue);
+            color: #000;
+        }
+        
+        .login-box .btn:hover {
+            box-shadow: 0 0 30px rgba(0, 168, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .login-box .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-box .error-msg {
+            color: #ff1744;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            min-height: 24px;
+        }
+        /* ===== لوحة التحكم ===== */
+        
+        .dashboard {
+            display: none;
+            padding: 30px 0 50px;
+        }
+        
+        .dashboard.active {
+            display: block;
+        }
+        /* ===== الإحصائيات ===== */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 24px 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+        }
+        
+        .stat-card .number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+        
+        .stat-card .label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        
+        .stat-card .icon {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            opacity: 0.4;
+            margin-bottom: 6px;
+        }
+        /* ===== التبويبات ===== */
+        
+        .section-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 15px;
+        }
+        
+        .section-tabs .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .section-tabs .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        .section-tabs .tab-btn.active {
+            background: var(--accent-blue);
+            color: #000;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        /* ===== الجداول ===== */
+        
+        .table-wrapper {
+            overflow-x: auto;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 700px;
+        }
+        
+        table th {
+            text-align: right;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+        
+        table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        .status-badge.unread {
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff1744;
+        }
+        
+        .status-badge.read {
+            background: rgba(0, 200, 83, 0.15);
+            color: #00c853;
+        }
+        
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        
+        .action-btn.delete:hover {
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff1744;
+        }
+        
+        .action-btn.edit:hover {
+            background: rgba(0, 168, 255, 0.15);
+            color: var(--accent-blue);
+        }
+        
+        .action-btn.view:hover {
+            background: rgba(0, 168, 255, 0.15);
+            color: var(--accent-blue);
+        }
+        /* ===== أزرار الإضافة ===== */
+        
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 20px;
+        }
+        
+        .add-btn:hover {
+            box-shadow: 0 0 30px rgba(0, 168, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        /* ===== المودال العام ===== */
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-box {
+            background: var(--primary-dark);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 40px 35px;
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+        
+        .modal-box h3 span {
+            color: var(--accent-blue);
+        }
+        
+        .modal-box .sub {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+        
+        .modal-box input,
+        .modal-box textarea,
+        .modal-box select {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: var(--pure-white);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        
+        .modal-box input:focus,
+        .modal-box textarea:focus,
+        .modal-box select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.06);
+        }
+        
+        .modal-box textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .modal-box .btn-group-modal {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .modal-box .btn-group-modal .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+        }
+        
+        .modal-box .btn-group-modal .btn-primary {
+            background: var(--accent-blue);
+            color: #000;
+        }
+        
+        .modal-box .btn-group-modal .btn-primary:hover {
+            box-shadow: 0 0 25px rgba(0, 168, 255, 0.3);
+        }
+        
+        .modal-box .btn-group-modal .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+        
+        .modal-box .btn-group-modal .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .modal-box .btn-group-modal .btn-danger {
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff1744;
+        }
+        
+        .modal-box .btn-group-modal .btn-danger:hover {
+            background: #ff1744;
+            color: #fff;
+        }
+        /* ===== مودال عرض الرسالة ===== */
+        
+        #messageModal .modal-box {
+            max-width: 650px;
+            background: var(--primary-dark);
+        }
+        
+        #messageModal .message-field {
+            margin-bottom: 14px;
+        }
+        
+        #messageModal .message-field label {
+            display: block;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        
+        #messageModal .message-field .value {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+        
+        #messageModal .message-field .value.long {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        #messageModal .close-btn {
+            margin-top: 20px;
+            text-align: left;
+        }
+        /* ===== إعدادات الموقع ===== */
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .settings-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 25px;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .settings-group input,
+        .settings-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 16px;
+        }
+        
+        .settings-group input:focus,
+        .settings-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+        
+        .settings-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .btn-save-settings {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .btn-save-settings:hover {
+            box-shadow: 0 0 25px rgba(0, 168, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .social-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .social-inputs input {
+            flex: 1;
+            min-width: 150px;
+        }
+        /* ===== إدارة "من نحن" ===== */
+        
+        .about-editor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .about-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 25px;
+        }
+        
+        .about-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .about-group input,
+        .about-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        
+        .about-group input:focus,
+        .about-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.05);
+        }
+        
+        .about-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .about-group .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .about-group .stats-row input {
+            margin-bottom: 0;
+        }
+        
+        .btn-save-about {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            margin-top: 10px;
+        }
+        
+        .btn-save-about:hover {
+            box-shadow: 0 0 25px rgba(0, 168, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .about-status {
+            margin-top: 15px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        /* ===== إدارة الهيرو (القسم الرئيسي) ===== */
+        
+        .hero-editor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .hero-group {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 25px;
+        }
+        
+        .hero-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .hero-group input,
+        .hero-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        
+        .hero-group input:focus,
+        .hero-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.05);
+        }
+        
+        .hero-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .btn-save-hero {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Cairo', sans-serif;
+            margin-top: 10px;
+        }
+        
+        .btn-save-hero:hover {
+            box-shadow: 0 0 25px rgba(0, 168, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .hero-status {
+            margin-top: 15px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        /* ===== Toast ===== */
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background: #00c853;
+            color: #000;
+        }
+        
+        .toast.error {
+            background: #ff1744;
+            color: #fff;
+        }
+        
+        .toast.info {
+            background: var(--accent-blue);
+            color: #000;
+        }
+        /* ===== حالة عدم وجود بيانات ===== */
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+        
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        /* ===== التوافق ===== */
+        
+        @media(max-width:992px) {
+            .about-editor,
+            .hero-editor {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media(max-width:768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            .login-box {
+                padding: 35px 25px;
+            }
+            .admin-nav .container {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .admin-nav .user-info .email {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .section-tabs .tab-btn {
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+            .modal-box {
+                padding: 30px 20px;
+            }
+            #messageModal .modal-box {
+                padding: 25px 20px;
+            }
+            .about-group .stats-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+        
+        @media(max-width:480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .admin-nav .logo-text {
+                font-size: 1.2rem;
+            }
+            .admin-nav .back-btn {
+                font-size: 0.75rem;
+                padding: 6px 14px;
+            }
+            .login-box h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====== شاشة تسجيل الدخول ====== -->
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+            <h2>SKY <span>VISION</span></h2>
+            <p class="sub">لوحة الإدارة • يُرجى تسجيل الدخول</p>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required autocomplete="email" />
+                <input type="password" id="loginPassword" placeholder="كلمة المرور" required autocomplete="current-password" />
+                <button type="submit" class="btn" id="loginBtn">دخول <i class="fas fa-arrow-left"></i></button>
+                <div class="error-msg" id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ====== لوحة التحكم ====== -->
+    <div class="dashboard" id="dashboard">
+        <nav class="admin-nav">
+            <div class="container">
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <a href="HomePage.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للموقع</a>
+                    <span class="logo-text">SKY <span>VISION</span> <span style="font-size:0.7rem; color:var(--text-light); font-weight:400;">| إدارة</span></span>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <div class="avatar" id="userAvatar">م</div>
+                    <span class="email" id="userEmail">admin@skyvision.dz</span>
+                    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- الإحصائيات -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-envelope"></i></div>
+                    <div class="number" id="statMessages">0</div>
+                    <div class="label">الرسائل</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-cogs"></i></div>
+                    <div class="number" id="statServices">0</div>
+                    <div class="label">الخدمات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-folder-open"></i></div>
+                    <div class="number" id="statProjects">0</div>
+                    <div class="label">المشاريع</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-comment-dots"></i></div>
+                    <div class="number" id="statTestimonials">0</div>
+                    <div class="label">آراء العملاء</div>
+                </div>
+            </div>
+
+            <!-- التبويبات -->
+            <div class="section-tabs" id="sectionTabs">
+                <button class="tab-btn active" data-tab="messages"><i class="fas fa-envelope"></i> الرسائل</button>
+                <button class="tab-btn" data-tab="hero"><i class="fas fa-home"></i> الرئيسية</button>
+                <button class="tab-btn" data-tab="about"><i class="fas fa-info-circle"></i> من نحن</button>
+                <button class="tab-btn" data-tab="services"><i class="fas fa-cogs"></i> الخدمات</button>
+                <button class="tab-btn" data-tab="projects"><i class="fas fa-folder-open"></i> المشاريع</button>
+                <button class="tab-btn" data-tab="testimonials"><i class="fas fa-comment-dots"></i> الآراء</button>
+                <button class="tab-btn" data-tab="settings"><i class="fas fa-sliders-h"></i> إعدادات الموقع</button>
+            </div>
+
+            <!-- ====== الرسائل ====== -->
+            <div class="tab-content active" id="tabMessages">
+                <div class="flex-between">
+                    <h3 style="font-size:1.3rem;"><i class="fas fa-envelope" style="color:var(--accent-blue);"></i> جميع الرسائل</h3>
+                    <span style="color:var(--text-light); font-size:0.85rem;" id="messagesCount"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الاسم</th>
+                                <th>البريد</th>
+                                <th>الهاتف</th>
+                                <th>الولاية</th>
+                                <th>الرسالة</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesBody"></tbody>
+                    </table>
+                </div>
+                <div id="messagesEmpty" class="empty-state hidden"><i class="fas fa-inbox"></i>
+                    <p>لا توجد رسائل بعد</p>
+                </div>
+            </div>
+
+            <!-- ====== الرئيسية (الهيرو) ====== -->
+            <div class="tab-content" id="tabHero">
+                <h3 style="font-size:1.3rem; margin-bottom:20px;"><i class="fas fa-home" style="color:var(--accent-blue);"></i> إدارة محتوى القسم الرئيسي (الهيرو)</h3>
+                <p style="color:var(--text-light); margin-bottom:25px;">هذه النصوص تظهر في أعلى الصفحة الرئيسية. يمكنك تعديلها كما تشاء.</p>
+                <form id="heroForm">
+                    <div class="hero-editor">
+                        <div class="hero-group">
+                            <label><i class="fas fa-tag"></i> الشارة (Badge)</label>
+                            <input type="text" id="heroBadge" placeholder="مثال: الحلول الأمنية المتكاملة في الجزائر" />
+
+                            <label><i class="fas fa-heading"></i> العنوان الرئيسي</label>
+                            <input type="text" id="heroTitle" placeholder="مثال: تركيب أنظمة مراقبة ذكية واحترافية" />
+
+                            <label><i class="fas fa-align-left"></i> الوصف</label>
+                            <textarea id="heroDesc" placeholder="نقدم أحدث تقنيات المراقبة والحلول الأمنية في الجزائر..."></textarea>
+                        </div>
+                        <div class="hero-group">
+                            <label><i class="fas fa-grip-lines"></i> نص الزر الأول (خدماتنا)</label>
+                            <input type="text" id="heroBtn1" placeholder="خدماتنا" />
+
+                            <label><i class="fas fa-grip-lines"></i> نص الزر الثاني (تواصل الآن)</label>
+                            <input type="text" id="heroBtn2" placeholder="تواصل الآن" />
+
+                            <div style="margin-top:10px; padding:15px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px dashed rgba(255,255,255,0.06);">
+                                <p style="color:var(--text-light); font-size:0.85rem;">
+                                    <i class="fas fa-info-circle"></i> يمكنك استخدام <strong>&lt;br&gt;</strong> لفصل السطور في العنوان.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save-hero" id="saveHeroBtn"><i class="fas fa-save"></i> حفظ محتوى الرئيسية</button>
+                </form>
+                <div id="heroStatus" class="hero-status"></div>
+            </div>
+
+            <!-- ====== من نحن ====== -->
+            <div class="tab-content" id="tabAbout">
+                <h3 style="font-size:1.3rem; margin-bottom:20px;"><i class="fas fa-info-circle" style="color:var(--accent-blue);"></i> إدارة محتوى "من نحن"</h3>
+                <p style="color:var(--text-light); margin-bottom:25px;">هذه البيانات تظهر في القسم الثاني من الصفحة الرئيسية.</p>
+                <form id="aboutForm">
+                    <div class="about-editor">
+                        <div class="about-group">
+                            <label><i class="fas fa-tag"></i> العنوان الرئيسي</label>
+                            <input type="text" id="aboutTitle" placeholder="مثال: نحن Sky Vision" />
+
+                            <label><i class="fas fa-paragraph"></i> الوصف الأول</label>
+                            <textarea id="aboutDesc1" placeholder="الوصف الأول للشركة..."></textarea>
+
+                            <label><i class="fas fa-paragraph"></i> الوصف الثاني</label>
+                            <textarea id="aboutDesc2" placeholder="الوصف الثاني للشركة..."></textarea>
+                        </div>
+                        <div class="about-group">
+                            <label><i class="fas fa-chart-bar"></i> الإحصائيات (الأرقام)</label>
+                            <div class="stats-row">
+                                <div>
+                                    <label style="font-size:0.8rem; color:var(--text-light);">المشاريع</label>
+                                    <input type="text" id="aboutStatsProjects" placeholder="+150" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.8rem; color:var(--text-light);">الشركاء</label>
+                                    <input type="text" id="aboutStatsPartners" placeholder="+30" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.8rem; color:var(--text-light);">رضا العملاء</label>
+                                    <input type="text" id="aboutStatsSatisfaction" placeholder="98%" />
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;">
+                                <label><i class="fas fa-map-marker-alt"></i> موقع المقر (اختياري)</label>
+                                <input type="text" id="aboutLocation" placeholder="تقرت - الجزائر" />
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save-about" id="saveAboutBtn"><i class="fas fa-save"></i> حفظ محتوى "من نحن"</button>
+                </form>
+                <div id="aboutStatus" class="about-status"></div>
+            </div>
+
+            <!-- ====== الخدمات ====== -->
+            <div class="tab-content" id="tabServices">
+                <div class="flex-between">
+                    <h3 style="font-size:1.3rem;"><i class="fas fa-cogs" style="color:var(--accent-blue);"></i> الخدمات</h3>
+                    <button class="add-btn" onclick="openModal('services')"><i class="fas fa-plus"></i> إضافة خدمة</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الأيقونة</th>
+                                <th>العنوان</th>
+                                <th>الوصف</th>
+                                <th>الترتيب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesBody"></tbody>
+                    </table>
+                </div>
+                <div id="servicesEmpty" class="empty-state hidden"><i class="fas fa-cogs"></i>
+                    <p>لا توجد خدمات مضافة</p>
+                </div>
+            </div>
+
+            <!-- ====== المشاريع ====== -->
+            <div class="tab-content" id="tabProjects">
+                <div class="flex-between">
+                    <h3 style="font-size:1.3rem;"><i class="fas fa-folder-open" style="color:var(--accent-blue);"></i> المشاريع</h3>
+                    <button class="add-btn" onclick="openModal('projects')"><i class="fas fa-plus"></i> إضافة مشروع</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الأيقونة</th>
+                                <th>العنوان</th>
+                                <th>الترتيب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsBody"></tbody>
+                    </table>
+                </div>
+                <div id="projectsEmpty" class="empty-state hidden"><i class="fas fa-folder-open"></i>
+                    <p>لا توجد مشاريع مضافة</p>
+                </div>
+            </div>
+
+            <!-- ====== الآراء ====== -->
+            <div class="tab-content" id="tabTestimonials">
+                <div class="flex-between">
+                    <h3 style="font-size:1.3rem;"><i class="fas fa-comment-dots" style="color:var(--accent-blue);"></i> آراء العملاء</h3>
+                    <button class="add-btn" onclick="openModal('testimonials')"><i class="fas fa-plus"></i> إضافة رأي</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الاسم</th>
+                                <th>المنصب</th>
+                                <th>النص</th>
+                                <th>النجوم</th>
+                                <th>الترتيب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testimonialsBody"></tbody>
+                    </table>
+                </div>
+                <div id="testimonialsEmpty" class="empty-state hidden"><i class="fas fa-comment-dots"></i>
+                    <p>لا توجد آراء مضافة</p>
+                </div>
+            </div>
+
+            <!-- ====== إعدادات الموقع ====== -->
+            <div class="tab-content" id="tabSettings">
+                <h3 style="font-size:1.3rem; margin-bottom:20px;"><i class="fas fa-sliders-h" style="color:var(--accent-blue);"></i> إعدادات التواصل</h3>
+                <form id="settingsForm">
+                    <div class="settings-grid">
+                        <div class="settings-group">
+                            <label><i class="fas fa-phone-alt"></i> رقم الهاتف</label>
+                            <input type="text" id="settingsPhone" placeholder="مثال: +213 5XX XX XX XX" />
+                            <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                            <input type="email" id="settingsEmail" placeholder="info@skyvision.dz" />
+                            <label><i class="fas fa-map-marker-alt"></i> العنوان</label>
+                            <input type="text" id="settingsAddress" placeholder="تقرت، الجزائر (نخدم جميع الولايات)" />
+                        </div>
+                        <div class="settings-group">
+                            <label><i class="fas fa-share-alt"></i> روابط السوشيال ميديا</label>
+                            <div class="social-inputs">
+                                <input type="url" id="settingsFacebook" placeholder="فيسبوك" />
+                                <input type="url" id="settingsTwitter" placeholder="تويتر" />
+                                <input type="url" id="settingsLinkedin" placeholder="لينكد إن" />
+                                <input type="url" id="settingsYoutube" placeholder="يوتيوب" />
+                                <input type="url" id="settingsInstagram" placeholder="انستغرام" />
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save-settings" id="saveSettingsBtn"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+                </form>
+                <div id="settingsStatus" style="margin-top:15px; color:var(--text-light);"></div>
+            </div>
+
+            <div style="height: 30px;"></div>
+        </div>
+    </div>
+
+    <!-- ====== مودال الإضافة/التعديل (عام) ====== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3 id="modalTitle">إضافة <span>جديد</span></h3>
+            <p class="sub" id="modalSub">أدخل البيانات ثم احفظ</p>
+            <form id="modalForm">
+                <div id="modalFields"></div>
+                <div class="btn-group-modal">
+                    <button type="submit" class="btn btn-primary" id="modalSaveBtn"><i class="fas fa-save"></i> حفظ</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+                    <button type="button" class="btn btn-danger hidden" id="modalDeleteBtn" onclick="deleteCurrentItem()"><i class="fas fa-trash"></i> حذف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ====== مودال عرض الرسالة ====== -->
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal-box" style="max-width:650px;">
+            <h3><i class="fas fa-envelope" style="color:var(--accent-blue);"></i> تفاصيل الرسالة</h3>
+            <div id="messageDetails" style="margin-top:20px;"></div>
+            <div class="close-btn">
+                <button class="btn btn-secondary" onclick="closeMessageModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== Toast ====== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // 1. تهيئة Firebase
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz44GsJG2KReo104A3f1OXQ0y4BZAXD0E",
+            authDomain: "skyvision-90042.firebaseapp.com",
+            databaseURL: "https://skyvision-90042-default-rtdb.firebaseio.com",
+            projectId: "skyvision-90042",
+            storageBucket: "skyvision-90042.firebasestorage.app",
+            messagingSenderId: "911367796900",
+            appId: "1:911367796900:web:e10b8324722bbc83a08e31",
+            measurementId: "G-GWXZ3HEG5V"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // ============================================================
+        // 2. عناصر DOM
+        // ============================================================
+        const loginPage = document.getElementById('loginPage');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmail = document.getElementById('userEmail');
+        const userAvatar = document.getElementById('userAvatar');
+        const statMessages = document.getElementById('statMessages');
+        const statServices = document.getElementById('statServices');
+        const statProjects = document.getElementById('statProjects');
+        const statTestimonials = document.getElementById('statTestimonials');
+        const messagesBody = document.getElementById('messagesBody');
+        const servicesBody = document.getElementById('servicesBody');
+        const projectsBody = document.getElementById('projectsBody');
+        const testimonialsBody = document.getElementById('testimonialsBody');
+        const messagesEmpty = document.getElementById('messagesEmpty');
+        const servicesEmpty = document.getElementById('servicesEmpty');
+        const projectsEmpty = document.getElementById('projectsEmpty');
+        const testimonialsEmpty = document.getElementById('testimonialsEmpty');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSub = document.getElementById('modalSub');
+        const modalFields = document.getElementById('modalFields');
+        const modalForm = document.getElementById('modalForm');
+        const modalSaveBtn = document.getElementById('modalSaveBtn');
+        const modalDeleteBtn = document.getElementById('modalDeleteBtn');
+        let currentCollection = '';
+        let currentEditId = null;
+        let currentData = null;
+
+        // عناصر الإعدادات
+        const settingsForm = document.getElementById('settingsForm');
+        const settingsPhone = document.getElementById('settingsPhone');
+        const settingsEmail = document.getElementById('settingsEmail');
+        const settingsAddress = document.getElementById('settingsAddress');
+        const settingsFacebook = document.getElementById('settingsFacebook');
+        const settingsTwitter = document.getElementById('settingsTwitter');
+        const settingsLinkedin = document.getElementById('settingsLinkedin');
+        const settingsYoutube = document.getElementById('settingsYoutube');
+        const settingsInstagram = document.getElementById('settingsInstagram');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const settingsStatus = document.getElementById('settingsStatus');
+
+        // عناصر مودال الرسالة
+        const messageModal = document.getElementById('messageModal');
+        const messageDetails = document.getElementById('messageDetails');
+
+        // عناصر "من نحن"
+        const aboutForm = document.getElementById('aboutForm');
+        const aboutTitle = document.getElementById('aboutTitle');
+        const aboutDesc1 = document.getElementById('aboutDesc1');
+        const aboutDesc2 = document.getElementById('aboutDesc2');
+        const aboutStatsProjects = document.getElementById('aboutStatsProjects');
+        const aboutStatsPartners = document.getElementById('aboutStatsPartners');
+        const aboutStatsSatisfaction = document.getElementById('aboutStatsSatisfaction');
+        const aboutLocation = document.getElementById('aboutLocation');
+        const saveAboutBtn = document.getElementById('saveAboutBtn');
+        const aboutStatus = document.getElementById('aboutStatus');
+
+        // عناصر الهيرو
+        const heroForm = document.getElementById('heroForm');
+        const heroBadge = document.getElementById('heroBadge');
+        const heroTitle = document.getElementById('heroTitle');
+        const heroDesc = document.getElementById('heroDesc');
+        const heroBtn1 = document.getElementById('heroBtn1');
+        const heroBtn2 = document.getElementById('heroBtn2');
+        const saveHeroBtn = document.getElementById('saveHeroBtn');
+        const heroStatus = document.getElementById('heroStatus');
+
+        // ============================================================
+        // 3. تسجيل الدخول مع التحقق من دور admin
+        // ============================================================
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            if (!email || !password) {
+                loginError.textContent = 'الرجاء إدخال البريد وكلمة المرور';
+                return;
+            }
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading-spinner"></span> جاري الدخول...';
+            loginError.textContent = '';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection('users').doc(user.uid).get()
+                        .then(doc => {
+                            if (doc.exists && doc.data().role === 'admin') {
+                                loginBtn.disabled = false;
+                                loginBtn.innerHTML = 'دخول <i class="fas fa-arrow-left"></i>';
+                                showToast('✅ مرحباً بك في لوحة الإدارة', 'success');
+                                loadDashboard(user);
+                            } else {
+                                auth.signOut();
+                                loginBtn.disabled = false;
+                                loginBtn.innerHTML = 'دخول <i class="fas fa-arrow-left"></i>';
+                                loginError.textContent = '❌ ليس لديك صلاحية الوصول إلى لوحة الإدارة.';
+                                showToast('❌ ليس لديك صلاحية الوصول.', 'error');
+                            }
+                        })
+                        .catch(() => {
+                            auth.signOut();
+                            loginBtn.disabled = false;
+                            loginBtn.innerHTML = 'دخول <i class="fas fa-arrow-left"></i>';
+                            loginError.textContent = '❌ خطأ في التحقق من الصلاحية.';
+                            showToast('❌ خطأ في التحقق من الصلاحية.', 'error');
+                        });
+                })
+                .catch((err) => {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'دخول <i class="fas fa-arrow-left"></i>';
+                    let msg = 'فشل تسجيل الدخول. تأكد من البيانات.';
+                    if (err.code === 'auth/user-not-found') msg = 'المستخدم غير موجود';
+                    else if (err.code === 'auth/wrong-password') msg = 'كلمة المرور غير صحيحة';
+                    else if (err.code === 'auth/invalid-email') msg = 'بريد إلكتروني غير صحيح';
+                    loginError.textContent = '❌ ' + msg;
+                    showToast('❌ ' + msg, 'error');
+                });
+        });
+
+        logoutBtn.addEventListener('click', function() {
+            auth.signOut().then(() => {
+                loginPage.style.display = 'flex';
+                dashboard.classList.remove('active');
+                showToast('تم تسجيل الخروج', 'info');
+            });
+        });
+
+        // ============================================================
+        // 4. تحميل لوحة التحكم
+        // ============================================================
+        function loadDashboard(user) {
+            loginPage.style.display = 'none';
+            dashboard.classList.add('active');
+            userEmail.textContent = user.email || 'admin@skyvision.dz';
+            userAvatar.textContent = (user.email ? user.email.charAt(0).toUpperCase() : 'م');
+            loadMessages();
+            loadHeroContent();
+            loadAboutContent();
+            loadServices();
+            loadProjects();
+            loadTestimonials();
+            loadSettings();
+            updateStats();
+            setupTabs();
+        }
+
+        // ============================================================
+        // 5. تحديث الإحصائيات
+        // ============================================================
+        function updateStats() {
+            db.collection('messages').get().then(snap => statMessages.textContent = snap.size);
+            db.collection('services').get().then(snap => statServices.textContent = snap.size);
+            db.collection('projects').get().then(snap => statProjects.textContent = snap.size);
+            db.collection('testimonials').get().then(snap => statTestimonials.textContent = snap.size);
+        }
+
+        // ============================================================
+        // 6. التبويبات
+        // ============================================================
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabs.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                    const tabId = 'tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1);
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // ============================================================
+        // 7. دوال الرسائل
+        // ============================================================
+        function loadMessages() {
+            db.collection('messages').orderBy('createdAt', 'desc').get()
+                .then(snapshot => {
+                    const body = messagesBody;
+                    body.innerHTML = '';
+                    if (snapshot.empty) {
+                        messagesEmpty.classList.remove('hidden');
+                        document.querySelector('#tabMessages .table-wrapper').style.display = 'none';
+                        return;
+                    }
+                    messagesEmpty.classList.add('hidden');
+                    document.querySelector('#tabMessages .table-wrapper').style.display = 'block';
+                    let i = 0;
+                    snapshot.forEach(doc => {
+                        i++;
+                        const d = doc.data();
+                        const tr = document.createElement('tr');
+                        const preview = d.message ? d.message.substring(0, 30) + (d.message.length > 30 ? '...' : '') :
+                            '';
+                        tr.innerHTML = `
+                            <td>${i}</td>
+                            <td><strong>${d.name || '?'}</strong></td>
+                            <td>${d.email || '?'}</td>
+                            <td>${d.phone || '?'}</td>
+                            <td>${d.city || '—'}</td>
+                            <td style="max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.message || ''}">${preview}</td>
+                            <td><span class="status-badge ${d.status === 'read' ? 'read' : 'unread'}">${d.status === 'read' ? 'مقروءة' : 'جديدة'}</span></td>
+                            <td>
+                                <button class="action-btn view" onclick="viewMessage('${doc.id}')" title="عرض"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn" onclick="toggleMessageStatus('${doc.id}', '${d.status}')" title="تغيير الحالة"><i class="fas ${d.status === 'read' ? 'fa-envelope' : 'fa-check-circle'}"></i></button>
+                                <button class="action-btn delete" onclick="deleteMessage('${doc.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                    document.getElementById('messagesCount').textContent = `(${i} رسالة)`;
+                })
+                .catch(err => console.error('❌ خطأ في تحميل الرسائل:', err));
+        }
+
+        function viewMessage(id) {
+            db.collection('messages').doc(id).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        showToast('❌ الرسالة غير موجودة', 'error');
+                        return;
+                    }
+                    const data = doc.data();
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleString('ar-EG') : 'غير معروف';
+                    const statusText = data.status === 'read' ? '✅ مقروءة' : '🆕 جديدة';
+                    messageDetails.innerHTML = `
+                        <div class="message-field"><label><i class="fas fa-user"></i> الاسم</label><div class="value">${data.name || 'غير معروف'}</div></div>
+                        <div class="message-field"><label><i class="fas fa-envelope"></i> البريد الإلكتروني</label><div class="value">${data.email || 'غير معروف'}</div></div>
+                        <div class="message-field"><label><i class="fas fa-phone-alt"></i> رقم الهاتف</label><div class="value">${data.phone || 'غير معروف'}</div></div>
+                        <div class="message-field"><label><i class="fas fa-map-marker-alt"></i> الولاية / المدينة</label><div class="value">${data.city || '—'}</div></div>
+                        <div class="message-field"><label><i class="fas fa-calendar-alt"></i> تاريخ الإرسال</label><div class="value">${date}</div></div>
+                        <div class="message-field"><label><i class="fas fa-tag"></i> الحالة</label><div class="value">${statusText}</div></div>
+                        <div class="message-field"><label><i class="fas fa-comment-dots"></i> نص الرسالة</label><div class="value long" style="white-space:pre-wrap; word-wrap:break-word;">${data.message || 'لا يوجد نص'}</div></div>
+                    `;
+                    messageModal.classList.add('active');
+                })
+                .catch(err => {
+                    showToast('❌ خطأ في تحميل الرسالة', 'error');
+                    console.error(err);
+                });
+        }
+
+        function closeMessageModal() {
+            messageModal.classList.remove('active');
+        }
+
+        messageModal.addEventListener('click', function(e) {
+            if (e.target === this) closeMessageModal();
+        });
+
+        function toggleMessageStatus(id, current) {
+            const newStatus = current === 'read' ? 'unread' : 'read';
+            db.collection('messages').doc(id).update({
+                    status: newStatus
+                })
+                .then(() => {
+                    showToast('✅ تم تغيير الحالة', 'success');
+                    loadMessages();
+                })
+                .catch(err => showToast('❌ فشل التحديث', 'error'));
+        }
+
+        function deleteMessage(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+            db.collection('messages').doc(id).delete()
+                .then(() => {
+                    showToast('✅ تم الحذف', 'success');
+                    loadMessages();
+                    updateStats();
+                })
+                .catch(err => showToast('❌ فشل الحذف', 'error'));
+        }
+
+        // ============================================================
+        // 8. دوال الهيرو (القسم الرئيسي)
+        // ============================================================
+        function loadHeroContent() {
+            db.collection('hero').doc('content').get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        heroBadge.value = data.badge || '';
+                        heroTitle.value = data.title || '';
+                        heroDesc.value = data.description || '';
+                        heroBtn1.value = data.btn1 || '';
+                        heroBtn2.value = data.btn2 || '';
+                    } else {
+                        // القيم الافتراضية
+                        heroBadge.value = 'الحلول الأمنية المتكاملة في الجزائر';
+                        heroTitle.value = 'تركيب أنظمة مراقبة <br><span>ذكية واحترافية</span>';
+                        heroDesc.value = 'نقدم أحدث تقنيات المراقبة والحلول الأمنية في الجزائر، مع خبرة تمتد لأكثر من 10 سنوات. مقرنا في تقرت ونخدم كل الولايات.';
+                        heroBtn1.value = 'خدماتنا';
+                        heroBtn2.value = 'تواصل الآن';
+                    }
+                })
+                .catch(err => console.warn('⚠️ تعذر تحميل محتوى الهيرو، استخدام القيم الافتراضية:', err));
+        }
+
+        heroForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveHeroBtn.disabled = true;
+            saveHeroBtn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
+            heroStatus.textContent = '';
+
+            const data = {
+                badge: heroBadge.value.trim() || 'الحلول الأمنية المتكاملة في الجزائر',
+                title: heroTitle.value.trim() || 'تركيب أنظمة مراقبة <br><span>ذكية واحترافية</span>',
+                description: heroDesc.value.trim() || 'نقدم أحدث تقنيات المراقبة والحلول الأمنية في الجزائر، مع خبرة تمتد لأكثر من 10 سنوات. مقرنا في تقرت ونخدم كل الولايات.',
+                btn1: heroBtn1.value.trim() || 'خدماتنا',
+                btn2: heroBtn2.value.trim() || 'تواصل الآن',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('hero').doc('content').set(data, {
+                    merge: true
+                })
+                .then(() => {
+                    showToast('✅ تم حفظ محتوى الرئيسية بنجاح', 'success');
+                    heroStatus.textContent = '✅ تم الحفظ في ' + new Date().toLocaleString();
+                    saveHeroBtn.disabled = false;
+                    saveHeroBtn.innerHTML = '<i class="fas fa-save"></i> حفظ محتوى الرئيسية';
+                })
+                .catch(err => {
+                    showToast('❌ فشل حفظ المحتوى: ' + err.message, 'error');
+                    heroStatus.textContent = '❌ خطأ: ' + err.message;
+                    saveHeroBtn.disabled = false;
+                    saveHeroBtn.innerHTML = '<i class="fas fa-save"></i> حفظ محتوى الرئيسية';
+                });
+        });
+
+        // ============================================================
+        // 9. دوال "من نحن"
+        // ============================================================
+        function loadAboutContent() {
+            db.collection('about').doc('content').get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        aboutTitle.value = data.title || '';
+                        aboutDesc1.value = data.description1 || '';
+                        aboutDesc2.value = data.description2 || '';
+                        aboutStatsProjects.value = data.statsProjects || '';
+                        aboutStatsPartners.value = data.statsPartners || '';
+                        aboutStatsSatisfaction.value = data.statsSatisfaction || '';
+                        aboutLocation.value = data.location || '';
+                    } else {
+                        aboutTitle.value = 'نحن Sky Vision';
+                        aboutDesc1.value = 'شركة جزائرية رائدة متخصصة في توفير أنظمة المراقبة والحلول الأمنية الذكية. نعمل مع أكبر العلامات التجارية العالمية لنمنحكم جودة لا تُضاهى، ونغطي بكفاءة جميع ولايات الوطن.';
+                        aboutDesc2.value = 'رسالتنا هي توفير بيئة آمنة من خلال تقنيات حديثة وأنظمة متطورة، مع فريق فني محترف للدعم على مدار الساعة أينما كنتم في ربوع الجزائر.';
+                        aboutStatsProjects.value = '+150';
+                        aboutStatsPartners.value = '+30';
+                        aboutStatsSatisfaction.value = '98%';
+                        aboutLocation.value = 'تقرت - الجزائر';
+                    }
+                })
+                .catch(err => console.warn('⚠️ تعذر تحميل محتوى "من نحن"، استخدام القيم الافتراضية:', err));
+        }
+
+        aboutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveAboutBtn.disabled = true;
+            saveAboutBtn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
+            aboutStatus.textContent = '';
+
+            const data = {
+                title: aboutTitle.value.trim() || 'نحن Sky Vision',
+                description1: aboutDesc1.value.trim() || 'شركة جزائرية رائدة...',
+                description2: aboutDesc2.value.trim() || 'رسالتنا هي توفير بيئة آمنة...',
+                statsProjects: aboutStatsProjects.value.trim() || '+150',
+                statsPartners: aboutStatsPartners.value.trim() || '+30',
+                statsSatisfaction: aboutStatsSatisfaction.value.trim() || '98%',
+                location: aboutLocation.value.trim() || 'تقرت - الجزائر',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('about').doc('content').set(data, {
+                    merge: true
+                })
+                .then(() => {
+                    showToast('✅ تم حفظ محتوى "من نحن" بنجاح', 'success');
+                    aboutStatus.textContent = '✅ تم الحفظ في ' + new Date().toLocaleString();
+                    saveAboutBtn.disabled = false;
+                    saveAboutBtn.innerHTML = '<i class="fas fa-save"></i> حفظ محتوى "من نحن"';
+                })
+                .catch(err => {
+                    showToast('❌ فشل حفظ المحتوى: ' + err.message, 'error');
+                    aboutStatus.textContent = '❌ خطأ: ' + err.message;
+                    saveAboutBtn.disabled = false;
+                    saveAboutBtn.innerHTML = '<i class="fas fa-save"></i> حفظ محتوى "من نحن"';
+                });
+        });
+
+        // ============================================================
+        // 10. دوال الخدمات
+        // ============================================================
+        function loadServices() {
+            db.collection('services').orderBy('order', 'asc').get()
+                .then(snapshot => {
+                    const body = servicesBody;
+                    body.innerHTML = '';
+                    if (snapshot.empty) {
+                        servicesEmpty.classList.remove('hidden');
+                        document.querySelector('#tabServices .table-wrapper').style.display = 'none';
+                        return;
+                    }
+                    servicesEmpty.classList.add('hidden');
+                    document.querySelector('#tabServices .table-wrapper').style.display = 'block';
+                    let i = 0;
+                    snapshot.forEach(doc => {
+                        i++;
+                        const d = doc.data();
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${i}</td>
+                            <td><i class="fas ${d.icon || 'fa-shield-alt'}" style="color:var(--accent-blue); font-size:1.3rem;"></i></td>
+                            <td><strong>${d.title || '?'}</strong></td>
+                            <td style="max-width:180px;">${d.desc || ''}</td>
+                            <td>${d.order || 0}</td>
+                            <td>
+                                <button class="action-btn edit" onclick="editItem('services', '${doc.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteItem('services', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error('❌ خطأ في تحميل الخدمات:', err));
+        }
+
+        // ============================================================
+        // 11. دوال المشاريع
+        // ============================================================
+        function loadProjects() {
+            db.collection('projects').orderBy('order', 'asc').get()
+                .then(snapshot => {
+                    const body = projectsBody;
+                    body.innerHTML = '';
+                    if (snapshot.empty) {
+                        projectsEmpty.classList.remove('hidden');
+                        document.querySelector('#tabProjects .table-wrapper').style.display = 'none';
+                        return;
+                    }
+                    projectsEmpty.classList.add('hidden');
+                    document.querySelector('#tabProjects .table-wrapper').style.display = 'block';
+                    let i = 0;
+                    snapshot.forEach(doc => {
+                        i++;
+                        const d = doc.data();
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${i}</td>
+                            <td><i class="fas ${d.icon || 'fa-building'}" style="color:var(--accent-blue); font-size:1.3rem;"></i></td>
+                            <td><strong>${d.title || '?'}</strong></td>
+                            <td>${d.order || 0}</td>
+                            <td>
+                                <button class="action-btn edit" onclick="editItem('projects', '${doc.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteItem('projects', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error('❌ خطأ في تحميل المشاريع:', err));
+        }
+
+        // ============================================================
+        // 12. دوال الآراء
+        // ============================================================
+        function loadTestimonials() {
+            db.collection('testimonials').orderBy('order', 'asc').get()
+                .then(snapshot => {
+                    const body = testimonialsBody;
+                    body.innerHTML = '';
+                    if (snapshot.empty) {
+                        testimonialsEmpty.classList.remove('hidden');
+                        document.querySelector('#tabTestimonials .table-wrapper').style.display = 'none';
+                        return;
+                    }
+                    testimonialsEmpty.classList.add('hidden');
+                    document.querySelector('#tabTestimonials .table-wrapper').style.display = 'block';
+                    let i = 0;
+                    snapshot.forEach(doc => {
+                        i++;
+                        const d = doc.data();
+                        const stars = '★'.repeat(d.stars || 5) + '☆'.repeat(5 - (d.stars || 5));
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${i}</td>
+                            <td><strong>${d.name || '?'}</strong></td>
+                            <td>${d.role || ''}</td>
+                            <td style="max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.text || ''}</td>
+                            <td style="color:#f9a825;">${stars}</td>
+                            <td>${d.order || 0}</td>
+                            <td>
+                                <button class="action-btn edit" onclick="editItem('testimonials', '${doc.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteItem('testimonials', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error('❌ خطأ في تحميل الآراء:', err));
+        }
+
+        // ============================================================
+        // 13. دوال الحذف والتعديل والإضافة (عامة)
+        // ============================================================
+        function deleteItem(collection, id) {
+            if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) return;
+            db.collection(collection).doc(id).delete()
+                .then(() => {
+                    showToast('✅ تم الحذف', 'success');
+                    refreshCollection(collection);
+                    updateStats();
+                })
+                .catch(err => showToast('❌ فشل الحذف', 'error'));
+        }
+
+        function openModal(collection, editId = null) {
+            currentCollection = collection;
+            currentEditId = editId;
+            const names = {
+                services: {
+                    title: 'خدمة',
+                    icon: 'fa-cogs'
+                },
+                projects: {
+                    title: 'مشروع',
+                    icon: 'fa-folder-open'
+                },
+                testimonials: {
+                    title: 'رأي عميل',
+                    icon: 'fa-comment-dots'
+                }
+            };
+            const info = names[collection] || {
+                title: 'عنصر',
+                icon: 'fa-plus'
+            };
+            if (editId) {
+                modalTitle.innerHTML = `تعديل <span>${info.title}</span>`;
+                modalSub.textContent = 'عدّل البيانات ثم احفظ';
+                modalDeleteBtn.classList.remove('hidden');
+                modalSaveBtn.textContent = 'تحديث';
+                db.collection(collection).doc(editId).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            showToast('❌ العنصر غير موجود', 'error');
+                            closeModal();
+                            return;
+                        }
+                        currentData = doc.data();
+                        renderModalFields(collection, currentData);
+                    })
+                    .catch(err => {
+                        showToast('❌ خطأ في التحميل', 'error');
+                        closeModal();
+                    });
+            } else {
+                modalTitle.innerHTML = `إضافة <span>${info.title}</span>`;
+                modalSub.textContent = 'أدخل البيانات ثم احفظ';
+                modalDeleteBtn.classList.add('hidden');
+                modalSaveBtn.textContent = 'حفظ';
+                currentData = null;
+                renderModalFields(collection, null);
+            }
+            modalOverlay.classList.add('active');
+        }
+
+        function renderModalFields(collection, data) {
+            let html = '';
+            const val = (key, def = '') => (data && data[key] !== undefined && data[key] !== null) ? data[key] : def;
+            if (collection === 'services') {
+                html = `
+                    <input type="text" id="f_title" placeholder="عنوان الخدمة" value="${val('title')}" required />
+                    <input type="text" id="f_icon" placeholder="أيقونة (مثال: fa-camera)" value="${val('icon')}" />
+                    <textarea id="f_desc" placeholder="وصف الخدمة">${val('desc')}</textarea>
+                    <input type="number" id="f_order" placeholder="الترتيب (رقم)" value="${val('order', 0)}" />
+                `;
+            } else if (collection === 'projects') {
+                html = `
+                    <input type="text" id="f_title" placeholder="عنوان المشروع" value="${val('title')}" required />
+                    <input type="text" id="f_icon" placeholder="أيقونة (مثال: fa-building)" value="${val('icon')}" />
+                    <input type="number" id="f_order" placeholder="الترتيب (رقم)" value="${val('order', 0)}" />
+                `;
+            } else if (collection === 'testimonials') {
+                html = `
+                    <input type="text" id="f_name" placeholder="اسم العميل" value="${val('name')}" required />
+                    <input type="text" id="f_role" placeholder="المنصب / الشركة" value="${val('role')}" />
+                    <textarea id="f_text" placeholder="نص الرأي" required>${val('text')}</textarea>
+                    <input type="number" id="f_stars" placeholder="عدد النجوم (1-5)" value="${val('stars', 5)}" min="1" max="5" />
+                    <input type="number" id="f_order" placeholder="الترتيب (رقم)" value="${val('order', 0)}" />
+                `;
+            }
+            modalFields.innerHTML = html;
+        }
+
+        modalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const collection = currentCollection;
+            const editId = currentEditId;
+            let data = {};
+            const get = (id) => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
+            if (collection === 'services') {
+                data = {
+                    title: get('f_title') || 'خدمة جديدة',
+                    icon: get('f_icon') || 'fa-shield-alt',
+                    desc: get('f_desc') || '',
+                    order: parseInt(get('f_order')) || 0
+                };
+            } else if (collection === 'projects') {
+                data = {
+                    title: get('f_title') || 'مشروع جديد',
+                    icon: get('f_icon') || 'fa-building',
+                    order: parseInt(get('f_order')) || 0
+                };
+            } else if (collection === 'testimonials') {
+                data = {
+                    name: get('f_name') || 'عميل',
+                    role: get('f_role') || '',
+                    text: get('f_text') || '',
+                    stars: Math.min(5, Math.max(1, parseInt(get('f_stars')) || 5)),
+                    order: parseInt(get('f_order')) || 0
+                };
+            }
+            if (!data.title && !data.name) {
+                showToast('❌ الرجاء ملء الحقول الأساسية', 'error');
+                return;
+            }
+            modalSaveBtn.disabled = true;
+            modalSaveBtn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
+            const promise = editId ?
+                db.collection(collection).doc(editId).update(data) :
+                db.collection(collection).add(data);
+            promise
+                .then(() => {
+                    showToast(editId ? '✅ تم التحديث' : '✅ تم الإضافة', 'success');
+                    closeModal();
+                    refreshCollection(collection);
+                    updateStats();
+                })
+                .catch(err => {
+                    showToast('❌ فشل الحفظ: ' + err.message, 'error');
+                })
+                .finally(() => {
+                    modalSaveBtn.disabled = false;
+                    modalSaveBtn.textContent = editId ? 'تحديث' : 'حفظ';
+                });
+        });
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            currentEditId = null;
+            currentData = null;
+            modalForm.reset();
+        }
+
+        function editItem(collection, id) {
+            openModal(collection, id);
+        }
+
+        function deleteCurrentItem() {
+            if (!currentEditId || !currentCollection) return;
+            deleteItem(currentCollection, currentEditId);
+            closeModal();
+        }
+
+        function refreshCollection(collection) {
+            if (collection === 'messages') loadMessages();
+            else if (collection === 'services') loadServices();
+            else if (collection === 'projects') loadProjects();
+            else if (collection === 'testimonials') loadTestimonials();
+        }
+
+        // ============================================================
+        // 14. إدارة إعدادات الموقع
+        // ============================================================
+        function loadSettings() {
+            db.collection('settings').doc('contactInfo').get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        settingsPhone.value = data.phone || '';
+                        settingsEmail.value = data.email || '';
+                        settingsAddress.value = data.address || '';
+                        settingsFacebook.value = data.facebook || '';
+                        settingsTwitter.value = data.twitter || '';
+                        settingsLinkedin.value = data.linkedin || '';
+                        settingsYoutube.value = data.youtube || '';
+                        settingsInstagram.value = data.instagram || '';
+                    } else {
+                        settingsPhone.value = '+213 5XX XX XX XX';
+                        settingsEmail.value = 'info@skyvision.dz';
+                        settingsAddress.value = 'تقرت، الجزائر (نخدم جميع الولايات)';
+                    }
+                })
+                .catch(err => console.error('❌ خطأ في تحميل الإعدادات:', err));
+        }
+
+        settingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveSettingsBtn.disabled = true;
+            saveSettingsBtn.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
+            settingsStatus.textContent = '';
+
+            const data = {
+                phone: settingsPhone.value.trim(),
+                email: settingsEmail.value.trim(),
+                address: settingsAddress.value.trim(),
+                facebook: settingsFacebook.value.trim(),
+                twitter: settingsTwitter.value.trim(),
+                linkedin: settingsLinkedin.value.trim(),
+                youtube: settingsYoutube.value.trim(),
+                instagram: settingsInstagram.value.trim(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('settings').doc('contactInfo').set(data, {
+                    merge: true
+                })
+                .then(() => {
+                    showToast('✅ تم حفظ الإعدادات بنجاح', 'success');
+                    settingsStatus.textContent = '✅ تم الحفظ في ' + new Date().toLocaleString();
+                    saveSettingsBtn.disabled = false;
+                    saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الإعدادات';
+                })
+                .catch(err => {
+                    showToast('❌ فشل حفظ الإعدادات: ' + err.message, 'error');
+                    settingsStatus.textContent = '❌ خطأ: ' + err.message;
+                    saveSettingsBtn.disabled = false;
+                    saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الإعدادات';
+                });
+        });
+
+        // ============================================================
+        // 15. Toast
+        // ============================================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ============================================================
+        // 16. حالة المصادقة
+        // ============================================================
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists && doc.data().role === 'admin') {
+                            loadDashboard(user);
+                        } else {
+                            auth.signOut();
+                            loginPage.style.display = 'flex';
+                            dashboard.classList.remove('active');
+                            showToast('❌ ليس لديك صلاحية.', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        auth.signOut();
+                        loginPage.style.display = 'flex';
+                        dashboard.classList.remove('active');
+                    });
+            } else {
+                loginPage.style.display = 'flex';
+                dashboard.classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        // 17. إغلاق المودال العام
+        // ============================================================
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        console.log('🚀 Sky Vision Admin Panel - متكامل مع Firebase');
+        console.log('📩 يمكنك عرض الرسائل كاملة عبر زر "عرض"');
+        console.log('🏠 يمكنك إدارة محتوى الهيرو (الرئيسية) من التبويب الجديد');
+        console.log('📝 يمكنك إدارة محتوى "من نحن" من التبويب المخصص');
+    </script>
+</body>
+
+</html>
