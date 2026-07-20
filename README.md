@@ -1,4 +1,3 @@
-```markdown
 # 🛡️ Sky Vision – الحلول الأمنية الذكية
 
 ![Sky Vision Logo](logo.png)
@@ -104,4 +103,3 @@ Sky_Vision/
 
 > *تم تطوير هذا المشروع بواسطة فريق Sky Vision – الجزائر 🇩🇿*  
 > *رئيسة المشروع: Merkhoufi Dalal*
-```
